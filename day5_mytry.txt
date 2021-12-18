@@ -1,0 +1,53 @@
+                                     
+computer IP -> 192.168.110.134
+
+vulnerabilitities found using nmap vun script`
+|
+|-port 443(tcp)
+|       |- ssl poodle information leak -> CVE-2014-3566
+|       |- Transport Layer Security (TLS) Protocol DHE_EXPORT Ciphers Downgrade MitM (Logjam) -> CVE-2015-4000
+|-port 139(smb)
+        |- SMBv2 exploit -> CVE-2009-3103
+                |- no metasploit entry for the CVE code
+
+---------------------------------------------
+nmap -A to get all information
+
+`443/tcp   open  ssl/https   Apache/1.3.20 (Unix)  (Red-Hat/Linux) mod_ssl/2.8.4 OpenSSL/0.9.6b`
+
+Red Hat Linux
+---------------------------------------------
+
+nikto scan
+|- old apache/1.3.20
+|       |- OSVDB-27487: Apache is vulnerable to XSS via the Expect header
+|       |- OSVDB-838: Apache/1.3.20 - Apache 1.x up 1.2.34 are vulnerable to a remote DoS and possible code execution. CAN-2002-0392.
+|       |       |- no metasploit entry
+|       |- OSVDB-4552: Apache/1.3.20 - Apache 1.3 below 1.3.27 are vulnerable to a local buffer overflow which allows attackers to kill any process on the system. CAN-2002-0839.
+|       |- OSVDB-2733: Apache/1.3.20 - Apache 1.3 below 1.3.29 are vulnerable to overflows in mod_rewrite and mod_cgi. CAN-2003-0542.
+|- old mod_ssl/2.8.4
+|       |- mod_ssl/2.8.4 - mod_ssl 2.8.7 and lower are vulnerable to a remote buffer overflow which may allow a remote shell. http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2002-0082, OSVDB-756.
+|- old OpenSSL/0.9.6b
+|- OSVDB-877: HTTP TRACE method is active, suggesting the host is vulnerable to XST
+|- OSVDB-682: /usage/: Webalizer may be installed. Versions lower than 2.01-09 vulnerable to Cross Site Scripting (XSS).
+|- OSVDB-3092: /test.php: This might be interesting...
+|- PHP backdoor filemanager
+|       |- /wp-content/themes/twentyeleven/images/headers/server.php?filesrc=/etc/hosts
+|       |- /wordpresswp-content/themes/twentyeleven/images/headers/server.php?filesrc=/etc/hosts
+|       |- /wp-includes/Requests/Utility/content-post.php?filesrc=/etc/hosts
+|       |- /wordpresswp-includes/Requests/Utility/content-post.php?filesrc=/etc/hosts
+|       |- /wp-includes/js/tinymce/themes/modern/Meuhy.php?filesrc=/etc/hosts
+|       |- /wordpresswp-includes/js/tinymce/themes/modern/Meuhy.php?filesrc=/etc/hosts
+|       |- /assets/mobirise/css/meta.php?filesrc=
+|- /shell?cat+/etc/hosts: A backdoor was identified.
+
+
+windows/smb/ms09_050_smb2_negotiate_func_index -> no session was created
+
+mod_ssl exploit
+|- https://www.exploit-db.com/exploits/764 -> https://github.com/heltonWernik/OpenLuck
+
+`./OpenFuck 0x6b 192.168.110.134 443 -c 50`
+
+
+direct root access
